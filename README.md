@@ -32,5 +32,5 @@ python torrent-games.py
 # Link for Hydra Launcher:
 
 ``
-https://github.com/dezinsect0r/HydraLinks-torrent-games.games/raw/refs/heads/main/torrent-games.json](https://raw.githubusercontent.com/dezinsect0r/HydraLinks-torrent-games.games/refs/heads/main/torrent-games.json
+https://raw.githubusercontent.com/dezinsect0r/HydraLinks-torrent-games.games/refs/heads/main/torrent-games.json
 ``
