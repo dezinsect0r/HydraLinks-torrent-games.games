@@ -1,5 +1,7 @@
 # HydraLinks-torrent-games.games
 
+### Need 1GB ram in final stage for build .json file
+
 ## How to run
 
 1. Install python3 and pip:
