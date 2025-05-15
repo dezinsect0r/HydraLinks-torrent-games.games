@@ -2,7 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import json
-from datetime import datetime
 from multiprocessing.pool import ThreadPool
 from time import sleep
 from random import uniform
@@ -13,7 +12,7 @@ from urllib.parse import urljoin
 BASE_URL = "https://torrent-games.games"
 HEADERS = {'User-Agent': 'Mozilla/5.0'}
 MAX_PAGES = 2574
-THREADS = 32
+THREADS = 16
 DELAY_RANGE = (0.2, 0.5)
 
 TRACKERS = [
@@ -48,19 +47,40 @@ def get_game_links_from_page(p):
     except:
         return []
 
+def parse_game_wrapper(args):
+    i, total, url = args
+    result = parse_game(url)
+    print(f"[{i}/{total}] {'✓' if result else '✗'} {url}")
+    return result
+
 def parse_game(url):
     try:
         sleep(uniform(*DELAY_RANGE))
         r = requests.get(url, headers=HEADERS, timeout=15)
         s = BeautifulSoup(r.text, 'html.parser')
         title = s.select_one('h1').text.strip()
+
         t_tag = s.select_one('#page__dl a[href*="do=download"]')
         torrent = urljoin(BASE_URL, t_tag['href']) if t_tag else ""
         magnet = torrent_to_magnet(torrent, title) if torrent else ""
-        date_li = s.find('li', string=re.compile("Дата"))
-        date = datetime.strptime(re.search(r'\d{2}\.\d{2}\.\d{4}', date_li.text).group(), "%d.%m.%Y").isoformat() + "Z" if date_li else "N/A"
-        size_li = s.find('li', string=re.compile("Размер"))
-        size = re.search(r'[\d.]+\s?[Гг][Бб]', size_li.text).group(0) if size_li else "N/A"
+
+        size = "N/A"
+        date = "N/A"
+        for li in s.select("ul.page__list li"):
+            label = li.select_one("span")
+            if not label:
+                continue
+            label_text = label.text.strip().lower()
+            content_text = li.get_text(separator=" ").replace(label.text, "").strip()
+            if "размер" in label_text:
+                m = re.search(r'([\d.,]+)', content_text)
+                if m:
+                    size = m.group(1).replace(",", ".") + "GB"
+            elif "дата" in label_text:
+                m = re.search(r'\d{2}\.\d{2}\.\d{4}', content_text)
+                if m:
+                    date = m.group(0)
+
         return {
             "title": title,
             "uris": [magnet],
@@ -72,18 +92,29 @@ def parse_game(url):
 
 def main():
     links = []
+    print("Собираем ссылки на все игры...")
     for p in range(1, MAX_PAGES + 1):
-        links.extend(get_game_links_from_page(p))
+        page_links = get_game_links_from_page(p)
+        print(f"Страница {p}/{MAX_PAGES}: найдено {len(page_links)} ссылок")
+        links.extend(page_links)
         sleep(0.1)
     links = list(set(links))
+    print(f"\nВсего уникальных ссылок: {len(links)}\n")
+
+    indexed_links = [(i + 1, len(links), link) for i, link in enumerate(links)]
+    print("Парсим страницы игр...")
     with ThreadPool(THREADS) as pool:
-        results = pool.map(parse_game, links)
+        results = pool.map(parse_game_wrapper, indexed_links)
+
     final = {
         "name": "Torrent-games",
         "downloads": [r for r in results if r]
     }
+
+    print("\nСохраняем hydra_ready.json...")
     with open("torrent-games.json", "w", encoding="utf-8") as f:
         json.dump(final, f, ensure_ascii=False, indent=2)
+    print("Готово.")
 
 if __name__ == "__main__":
     main()
