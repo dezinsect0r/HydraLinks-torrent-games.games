@@ -82,7 +82,7 @@ def main():
         "name": "Torrent-games",
         "downloads": [r for r in results if r]
     }
-    with open("hydra_ready.json", "w", encoding="utf-8") as f:
+    with open("torrent-games.json", "w", encoding="utf-8") as f:
         json.dump(final, f, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
