@@ -46,9 +46,9 @@ python torrent-games.py
 
 # Link for Hydra Launcher:
 
-``
+```Link
 https://raw.githubusercontent.com/dezinsect0r/HydraLinks-torrent-games.games/refs/heads/main/torrent-games.json
-``
+```
 
 ---
 ## DMCA & Rights Holders
