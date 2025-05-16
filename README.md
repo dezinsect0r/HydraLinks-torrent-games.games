@@ -29,6 +29,21 @@ pip install requests beautifulsoup4 bencodepy
 python torrent-games.py
 ```
 
+## Example .json structure
+```json
+{
+  "name": "Torrent-games",
+  "downloads": [
+    {
+      "title": "Game-Name",
+      "uris": [
+        "Magnet-Link"
+      ],
+      "uploadDate": "27.04.2025",
+      "fileSize": "6.71GB"
+    },
+```
+
 # Link for Hydra Launcher:
 
 ``
