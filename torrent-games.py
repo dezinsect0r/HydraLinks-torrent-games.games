@@ -79,7 +79,7 @@ def parse_game(url):
             elif "дата" in label_text:
                 m = re.search(r'\d{2}\.\d{2}\.\d{4}', content_text)
                 if m:
-                    date = m.group(0)
+                    date = m.group(0).replace(".", "-")
 
         return {
             "title": title,
